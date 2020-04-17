@@ -186,15 +186,17 @@ void getCmdAndPara(char *cmdstring, char *cmd, char *para){
         memcpy(para, end + 1, strlen(end));
     }else{
         memcpy(cmd, cmdstring, strlen(cmdstring));
+        cmd[strlen(cmdstring)] = '\0';
         para = NULL;
     } 
 }
 
 int buildIn(char *cmdstring){
-    char cmd[MAX_CMD_LENGTH];
-    char para[MAX_CMD_LENGTH];
+    char cmd[MAX_CMD_LENGTH] = {'\0'};
+    char para[MAX_CMD_LENGTH] = {'\0'};
     getCmdAndPara(cmdstring, cmd, para);
     if(strcmp(cmd, "exit") == 0){
+        printf("\n\n***\tHave a nice day!\t***\n\n\n");
         exit(0);
         return 1;
     }else if(strcmp(cmd, "about") == 0){
