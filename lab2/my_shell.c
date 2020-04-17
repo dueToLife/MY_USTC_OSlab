@@ -1,3 +1,8 @@
+/*
+*   my_shell.c
+*   date: 2020.4.18
+*   author: Wu Kepeng
+*/
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -159,6 +164,19 @@ void zeroBuff(char* buff, int size) {
     }
 }
 
+void showpwd(){
+    int status, fd, count;
+    char buf[1024];
+    fd = os_popen("pwd", 'r');
+    count = read(fd, buf, sizeof(buf));
+    status = os_pclose(fd);
+    if(status == -1){
+        printf("show pwd error\n");
+    }
+    buf[count-1]=':';
+    write(STDOUT_FILENO, buf, count);
+}
+
 int main() {
     int     cmd_num, i, j, fd1, fd2, count, status;
     pid_t   pids[MAX_CMD_NUM];
@@ -167,7 +185,8 @@ int main() {
     char    buf[4096];
     while(1){
         /* 将标准输出文件描述符作为参数传入write，即可实现print */
-	    write(STDOUT_FILENO, "os shell ->", 11);
+	    write(STDOUT_FILENO, "os shell->", 10);
+        showpwd();
         gets(cmdline);
         cmd_num = parseCmd(cmdline, cmds);
         /*执行每条命令*/
@@ -182,8 +201,10 @@ int main() {
                 len = (cmds[i] + strlen(cmds[i])) - div - 1;
                 memcpy(cmd2, div + 1, len);
                 cmd2[len] = '\0';
+                /*
                 printf("cmd1: %s\n", cmd1);
                 printf("cmd2: %s\n", cmd2);
+                */
                 /*清除缓存*/
                 zeroBuff(buf, strlen(buf));
                 /* 5.1 运行cmd1，并将cmd1标准输出存入buf中 */
