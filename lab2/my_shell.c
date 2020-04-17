@@ -177,12 +177,44 @@ void showpwd(){
     write(STDOUT_FILENO, buf, count);
 }
 
+void getCmdAndPara(char *cmdstring, char *cmd, char *para){
+    char *start = cmdstring;
+    char *end = strchr(cmdstring, ' ');
+    if(end != NULL){
+        memcpy(cmd, start, end - start);
+        cmd[end-start] = '\0';
+        memcpy(para, end + 1, strlen(end));
+    }else{
+        memcpy(cmd, cmdstring, strlen(cmdstring));
+        para = NULL;
+    } 
+}
+
+int buildIn(char *cmdstring){
+    char cmd[MAX_CMD_LENGTH];
+    char para[MAX_CMD_LENGTH];
+    getCmdAndPara(cmdstring, cmd, para);
+    if(strcmp(cmd, "exit") == 0){
+        exit(0);
+        return 1;
+    }else if(strcmp(cmd, "about") == 0){
+        printf("\n\nUSTC_18_OS\nauthor:Wu Kepeng PB18151858\ndata:2020.4.19\nversion:0.0.2\n\n\n");
+        return 1;
+    }else if(strcmp(cmd, "cd") == 0){
+        chdir(para);
+        return 1;
+    }
+    return 0;
+}
+
 int main() {
     int     cmd_num, i, j, fd1, fd2, count, status;
     pid_t   pids[MAX_CMD_NUM];
     char    cmdline[MAX_CMDLINE_LENGTH];
     char    cmds[MAX_CMD_NUM][MAX_CMD_LENGTH];
     char    buf[4096];
+    char cmd1[MAX_CMD_LENGTH], cmd2[MAX_CMD_LENGTH];
+    int len;
     while(1){
         /* 将标准输出文件描述符作为参数传入write，即可实现print */
 	    write(STDOUT_FILENO, "os shell->", 10);
@@ -194,7 +226,7 @@ int main() {
             char *div = strchr(cmds[i], '|');
             if (div) {
                 /* 如果需要用到管道功能 */
-                char cmd1[MAX_CMD_LENGTH], cmd2[MAX_CMD_LENGTH];
+               
                 int len = div - cmds[i];
                 memcpy(cmd1, cmds[i], len);
                 cmd1[len] = '\0';
@@ -222,9 +254,11 @@ int main() {
             }
             else {
                 /* 6 一般命令的运行 */
-                status = os_system(cmds[i]);
-                if(status == -1) 
-                    printf("cmd: %s error!\n", cmds[i]);
+                if(buildIn(cmds[i]) == 0){
+                    status = os_system(cmds[i]);
+                    if(status == -1) 
+                        printf("cmd: %s error!\n", cmds[i]);
+                }
             }
         }
     }
